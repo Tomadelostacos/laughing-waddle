@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
 import { GitlabService } from 'src/app/services/gitlab.service';
-import { HttpService } from 'src/app/services/http.service';
 import config from '../../../assets/config.json';
 
 @Component({
