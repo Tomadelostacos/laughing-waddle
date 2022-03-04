@@ -10,18 +10,21 @@ import config from '../../../assets/config.json';
 export class GitlabComponent implements OnInit {
 
   title = 'webview-gitlab';
-  projectIds: Array<string>
+  projectIds: Array<string>;
   projectInfos: Array<any>;
 
   tempTokenGitlab: string;
-
   tokenGitlab: string;
+  availableReleaseBranches: any;
+  runningPipeline: any;
 
   constructor(private gitlabService: GitlabService) {
     this.projectIds = config.projectIds;
     this.projectInfos = [];
     this.tokenGitlab = '';
     this.tempTokenGitlab = '';
+    this.availableReleaseBranches = {};
+    this.runningPipeline = {};
   }
 
   ngOnInit(): void {
@@ -35,9 +38,54 @@ export class GitlabComponent implements OnInit {
     }
   }
 
+  private computeVersionAndRunPipeline(project: string, branch: string, version: string[], typeOfVersionIncrement: number){
+    if(typeOfVersionIncrement == 0){
+      version[0] = (parseInt(version[0])+1).toString();
+      version[1] = version[2] = "0";
+    }
+    else if(typeOfVersionIncrement == 1){
+      version[1] = (parseInt(version[1])+1).toString();
+      version[2] = "0";
+    }
+    let releaseVersion = version.join(".");
+
+    version[2] = (parseInt(version[2])+1).toString();
+    let snapVersion = version.join(".") + "-SNAPSHOT";
+
+    this.gitlabService.postPipeline(project, branch, releaseVersion, snapVersion).subscribe();
+    this.runningPipeline[project] = "<span>La pipeline a été lancé sur la branche <span class='fw-bold'>" + branch + "</span> pour la release <span class='fw-bold'>" + releaseVersion +"</span> (next snapshot : " + snapVersion + ").</span>";
+  }
+
+  onReleaseSelected(project: string, branch: string, typeOfVersionIncrement: number = 1){
+    let readable: any;
+    let version = [];
+
+    // First try to get package.json, if it fails then try to retrieve pom.xml
+    // For FENG projects
+    this.gitlabService.getFile(project, branch, 'package.json').subscribe(file => {
+      readable = JSON.parse(atob(file.content));
+      version = readable.version.replace('-SNAPSHOT', '').split(".");
+
+      this.computeVersionAndRunPipeline(project, branch, version, typeOfVersionIncrement);
+    },
+    error => {
+      // For JAMS projects
+      this.gitlabService.getFile(project, branch, 'pom.xml').subscribe(file => {
+        readable = atob(file.content);
+        readable = readable.substring(0, readable.indexOf('-SNAPSHOT</version>'));
+        version = readable.substring(readable.lastIndexOf('<version>')+9).trim().split(".");
+  
+        this.computeVersionAndRunPipeline(project, branch, version, typeOfVersionIncrement);
+      });
+    })
+  }
+
   refreshContent(): void {
     this.projectIds.forEach(element => {
       this.gitlabService.getProject(element).subscribe(response => {
+        this.availableReleaseBranches[element] = [];
+
+
         this.gitlabService.getMergeRequests(element).subscribe(mrResponse => {
 
           var mergeRequests: { conflicts: any; auteur: any; avatar: any, url: any; source: any; target: any; date: any; titre: any; statut: any }[] = [];
@@ -69,6 +117,10 @@ export class GitlabComponent implements OnInit {
 
             });
 
+            this.gitlabService.getBranchesFilter(element, "^version").subscribe(branchesResponse => {
+              branchesResponse.forEach((branche: any) => this.availableReleaseBranches[element].push(branche.name))
+            });
+
             this.gitlabService.getBranches(element).subscribe(branchesResponse => {
 
               var branches: { nom: any; url: any; auteur: any; dernier_commit: any; nom_commit: any; }[] = [];
@@ -80,6 +132,7 @@ export class GitlabComponent implements OnInit {
                   dernier_commit: branche.commit.committed_date,
                   nom_commit: branche.commit.title
                 });
+
               });
 
               this.projectInfos.push({
