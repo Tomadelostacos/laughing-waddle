@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Branch, BrancheFactory, GitlabBranch } from 'src/app/models/branche';
 import { GitlabMergeRequest, MergeRequest, MergeRequestFactory } from 'src/app/models/merge-request';
 import { GitlabPipeline, Pipeline, PipelineFactory } from 'src/app/models/pipeline';
+import { ProjectInfo } from 'src/app/models/project-info';
 import { GitlabService } from 'src/app/services/gitlab.service';
 import config from '../../../assets/config.json';
 
@@ -121,7 +122,11 @@ export class GitlabComponent implements OnInit {
                 mergeRequests: mergeRequests,
                 pipelines: pipelines,
                 branches: branches
-              });
+              });           
+
+              this.projectInfos.sort((a: ProjectInfo, b: ProjectInfo): number => {
+                return a.nom.localeCompare(b.nom, 'fr');
+              })
             });
           });
         });
