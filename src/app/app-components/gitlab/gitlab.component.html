@@ -44,19 +44,19 @@
           </div>
           <div class="container">
             <div class="row" *ngIf="!runningPipeline[project.id]">
-              <div class="col-sm-9 col-lg-6 col-xl-4">
+              <div class="col-sm-9 col-lg-6 col-xl-4 mt-3">
                 <select class="form-select text-primary" #selectReleaseMajeur aria-label="Release branch selection" (change)="onReleaseSelected(project.id, selectReleaseMajeur.value, 0)">
                   <option selected disabled>Créer release Majeur</option>
                   <option *ngFor="let branche of availableReleaseBranches[project.id]">{{ branche }}</option>
                 </select>
               </div>
-              <div class="col-sm-9 col-lg-6 col-xl-4">
+              <div class="col-sm-9 col-lg-6 col-xl-4 mt-3">
                 <select class="form-select text-primary" #selectReleaseMineur aria-label="Release branch selection" (change)="onReleaseSelected(project.id, selectReleaseMineur.value, 1)">
                   <option selected disabled>Créer release Mineur</option>
                   <option *ngFor="let branche of availableReleaseBranches[project.id]">{{ branche }}</option>
                 </select>
               </div>
-              <div class="col-sm-9 col-lg-6 col-xl-4">
+              <div class="col-sm-9 col-lg-6 col-xl-4 mt-3">
                 <select class="form-select text-primary" #selectpatch aria-label="Release branch selection" (change)="onReleaseSelected(project.id, selectpatch.value, 2)">
                   <option selected disabled>Créer un Patch</option>
                   <option *ngFor="let branche of availableReleaseBranches[project.id]">{{ branche }}</option>
@@ -70,9 +70,13 @@
               <div class="col-9" [innerHtml]="runningPipeline[project.id]"></div>
             </div>
             <div class="row mt-4">
-              <div class="col-6">
+              <div class="col-md-6 col-lg-4 col-xl-3">
                 <a href="{{ project.url }}/pipelines" target="_blank"><button type="button"
                   class="btn btn-outline-primary">Aller à la CI</button></a>
+              </div>
+              <div class="col-6">
+                <a href="http://knw116.krj.gie:81/fullcontrol/index.php?mod=jobs&action=start.view" target="_blank"><button type="button"
+                  class="btn btn-outline-primary">Aller sur Build Forge</button></a>
               </div>
             </div>
           </div>

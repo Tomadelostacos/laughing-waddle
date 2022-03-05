@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { interval } from 'rxjs';
-import { take, timeout } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { Branch, BrancheFactory, GitlabBranch } from 'src/app/models/branche';
 import { GitlabMergeRequest, MergeRequest, MergeRequestFactory } from 'src/app/models/merge-request';
 import { GitlabPipeline, Pipeline, PipelineFactory } from 'src/app/models/pipeline';
