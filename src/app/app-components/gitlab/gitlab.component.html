@@ -1,4 +1,4 @@
-<header class="d-flex justify-content-center py-3 bg-dark text-white fixed-top" *ngIf="ifExistsTokenGitlab()">
+<header class="d-flex justify-content-center py-3 bg-dark text-white fixed-top" *ngIf="gitlabService.authorizationBearerToken">
 
     <ul class="nav nav-pills">
       <li *ngFor="let project of projectInfos"><a href="#{{ project.nom }}" style="color: white;--bs-scroll-height: 100px;"
@@ -11,7 +11,7 @@
     <div class="px-4 py-3 my-1 text-center">
       <h1 class="display-5 fw-bold">Gitlab Overview</h1>
     </div>
-    <div class="row row-cols-2" *ngIf="ifExistsTokenGitlab()">
+    <div class="row row-cols-2" *ngIf="gitlabService.authorizationBearerToken">
       <ng-container *ngFor="let project of projectInfos">
   
         <div class="project col" id="{{ project.nom }}">
@@ -35,8 +35,8 @@
           <div *ngIf="project.pipelines.length" class="projectMR">
             <h4>Pipelines</h4>
             <ul class="list-unstyled">
-              <li *ngFor="let pipeline of project.pipelines"><b> {{ pipeline.branche }}</b> - <b
-                  [ngStyle]="{'color': pipeline.status=='success' ? 'green' : 'red'}">{{ pipeline.status }}</b>
+              <li *ngFor="let pipeline of project.pipelines"><strong> {{ pipeline.branche }}</strong> - <strong
+                  [ngStyle]="{'color': pipeline.status=='success' ? 'green' : PIPELINE_STATUS_IN_PROGRESS.includes(pipeline.status) ? '#007bff' : 'red'}">{{ pipeline.status }}</strong>
                 - <a href="{{ pipeline.url }}" target="_blank">Aller vers la Pipeline</a> <br>
                 ({{ pipeline.date | date:'full' }})
               </li>
@@ -94,7 +94,7 @@
     </div>
   
   
-    <div *ngIf="!ifExistsTokenGitlab()">
+    <div *ngIf="!gitlabService.authorizationBearerToken">
   
       <div class="px-4 py-3 my-1 text-center">
         <h1 class="display-5 fw-bold">Renseigner le token Gitlab </h1>

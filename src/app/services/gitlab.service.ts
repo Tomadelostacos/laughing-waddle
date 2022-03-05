@@ -18,7 +18,8 @@ export class GitlabService extends HttpService{
     return this.getRequestWithHeader(this.baseURL + projectId + '/merge_requests?state=opened');
   }
 
-  getPipelines(projectId: string): Observable<any> {
+  getPipelines(projectId: string, perPage?: string|number): Observable<any> {
+    if(perPage) return this.getRequestWithHeader(this.baseURL + projectId + '/pipelines?per_page='+perPage)
     return this.getRequestWithHeader(this.baseURL + projectId + '/pipelines');
   }
 
