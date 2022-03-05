@@ -88,17 +88,16 @@ export class GitlabComponent implements OnInit {
       this.gitlabService.getProject(element).subscribe(response => {
         this.availableReleaseBranches[element] = [];
 
-
         this.gitlabService.getMergeRequests(element).subscribe(mrResponse => {
 
-          var mergeRequests: MergeRequest[] = [];
+          let mergeRequests: MergeRequest[] = [];
           mrResponse.forEach((mrResponseElement: GitlabMergeRequest) => {
             mergeRequests.push(MergeRequestFactory.fromGitlabMergeRequestToMergeRequest(mrResponseElement));
           });
 
           this.gitlabService.getPipelines(element).subscribe(pipelineResponse => {
 
-            var pipelines: Pipeline[] = [];
+            let pipelines: Pipeline[] = [];
             pipelineResponse.slice(0, 5).forEach((pipelineResponseElement: GitlabPipeline) => {
               pipelines.push(PipelineFactory.fromGitlabPipelineToPipeline(pipelineResponseElement));
             });
@@ -109,7 +108,7 @@ export class GitlabComponent implements OnInit {
 
             this.gitlabService.getBranches(element).subscribe(branchesResponse => {
 
-              var branches: Branch[] = [];
+              let branches: Branch[] = [];
               branchesResponse.forEach((branch: GitlabBranch) => {
                 branches.push(BrancheFactory.fromGitlabBranchToBranch(branch));
               });
