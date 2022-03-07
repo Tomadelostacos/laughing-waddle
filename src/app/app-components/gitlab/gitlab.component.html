@@ -1,0 +1,123 @@
+<header class="d-flex justify-content-center py-3 bg-dark text-white fixed-top" *ngIf="gitlabService.authorizationBearerToken">
+
+    <ul class="nav nav-pills">
+      <li *ngFor="let project of projectInfos"><a href="#{{ project.nom }}" style="color: white;--bs-scroll-height: 100px;"
+          class="nav-link">{{ project.nom }}</a></li>
+    </ul>
+  
+  </header>
+  
+  <div class="container">
+    <div class="px-4 py-3 my-1 text-center">
+      <h1 class="display-5 fw-bold">Gitlab Overview</h1>
+    </div>
+    <div class="row row-cols-2" *ngIf="gitlabService.authorizationBearerToken">
+      <ng-container *ngFor="let project of projectInfos">
+  
+        <div class="project col" id="{{ project.nom }}">
+          <h2 class="projectTitle"><a href="{{ project.url }}">{{ project.nom }} </a></h2>
+          <h6>{{ project.description }}</h6>
+          <div *ngIf="project.mergeRequests.length" class="projectMR"
+            style="border-left: solid 5px tomato; padding:20px;">
+            <h4>Merge Requests</h4>
+            <ul class="list-unstyled">
+              <li *ngFor="let mr of project.mergeRequests" style="margin-bottom: 10px;"><b> {{ mr.titre }}</b>, {{ mr.source }} vers {{ mr.target }}
+                <br><img src="{{ mr.avatar }}" style="height: 1.5em"><i>({{ mr.auteur }})</i> <br />
+                <span *ngIf="mr.statut == 'can_be_merged'" style="color:green"> <b>MERGEABLE</b> - </span>
+                <span *ngIf="mr.statut != 'can_be_merged'" style="color:red"> <b>PAS MERGEABLE</b> - </span>
+                <span *ngIf="!mr.conflicts" style="color:green"> <b>PAS DE CONFLIT :)</b></span> 
+                <span *ngIf="mr.conflicts" style="color:red"> <b>Y'A DES CONFLITS</b></span>
+                - <a href="{{ mr.url }}" target="_blank">Aller vers la MR</a>
+  
+              </li>
+            </ul>
+          </div>
+          <div *ngIf="project.pipelines.length" class="projectMR">
+            <h4>Pipelines</h4>
+            <ul class="list-unstyled">
+              <li *ngFor="let pipeline of project.pipelines"><strong> {{ pipeline.branche }}</strong> - <strong
+                  [ngStyle]="{'color': pipeline.status=='success' ? 'green' : PIPELINE_STATUS_IN_PROGRESS.includes(pipeline.status) ? '#007bff' : 'red'}">{{ pipeline.status }}</strong>
+                - <a href="{{ pipeline.url }}" target="_blank">Aller vers la Pipeline</a> <br>
+                ({{ pipeline.date | date:'full' }})
+              </li>
+            </ul>
+          </div>
+          <div class="container">
+            <div class="row" *ngIf="!runningPipeline[project.id]">
+              <div class="col-sm-9 col-lg-6 col-xl-4 mt-3">
+                <select class="form-select text-primary" #selectReleaseMajeur aria-label="Release branch selection" (change)="onReleaseSelected(project.id, selectReleaseMajeur.value, 0)">
+                  <option selected disabled>Créer release Majeur</option>
+                  <option *ngFor="let branche of availableReleaseBranches[project.id]">{{ branche }}</option>
+                </select>
+              </div>
+              <div class="col-sm-9 col-lg-6 col-xl-4 mt-3">
+                <select class="form-select text-primary" #selectReleaseMineur aria-label="Release branch selection" (change)="onReleaseSelected(project.id, selectReleaseMineur.value, 1)">
+                  <option selected disabled>Créer release Mineur</option>
+                  <option *ngFor="let branche of availableReleaseBranches[project.id]">{{ branche }}</option>
+                </select>
+              </div>
+              <div class="col-sm-9 col-lg-6 col-xl-4 mt-3">
+                <select class="form-select text-primary" #selectpatch aria-label="Release branch selection" (change)="onReleaseSelected(project.id, selectpatch.value, 2)">
+                  <option selected disabled>Créer un Patch</option>
+                  <option *ngFor="let branche of availableReleaseBranches[project.id]">{{ branche }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="row" *ngIf="runningPipeline[project.id]">
+              <div class="col-3 spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <div class="col-9" [innerHtml]="runningPipeline[project.id]"></div>
+            </div>
+            <div class="row mt-4">
+              <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{{ project.url }}/pipelines" target="_blank"><button type="button"
+                  class="btn btn-outline-primary">Aller à la CI</button></a>
+              </div>
+              <div class="col-6">
+                <a href="http://knw116.krj.gie:81/fullcontrol/index.php?mod=jobs&action=start.view" target="_blank"><button type="button"
+                  class="btn btn-outline-primary">Aller sur Build Forge</button></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="project">
+          <h6>Branches</h6>
+          <ul class="list-unstyled">
+            <div class="row row-cols-2">
+              <li class="col" *ngFor="let branche of project.branches"><a href="{{ branche.url }}"
+                  target="_blank">{{ branche.nom }}</a> -
+                <i style="color: #777">{{ branche.auteur }}</i>
+              </li>
+            </div>
+          </ul>
+        </div>
+  
+      </ng-container>
+  
+    </div>
+  
+  
+    <div *ngIf="!gitlabService.authorizationBearerToken">
+  
+      <div class="px-4 py-3 my-1 text-center">
+        <h1 class="display-5 fw-bold">Renseigner le token Gitlab </h1>
+      </div>
+      <div class="row">
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="Token Gitlab" [(ngModel)]="tempTokenGitlab">
+          <div class="input-group-append">
+            <button (click)="putTokenGitlab()" type="submit" class="btn btn-secondary">Envoyer au localStorage</button>
+          </div>
+        </div>
+      </div>
+  
+  
+      
+    </div>
+  
+  
+  
+  
+  </div>
+  

@@ -1,37 +1,33 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
-import config from '../assets/config.json';
+import config from '../../assets/config.json';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HttpService {
-
-  Uri: any;
-  tokenGitlab: string;
-
+  authorizationBearerToken: string;
   httpOptionsJson: any;
 
   constructor(private httpClient: HttpClient) {
-    this.tokenGitlab = '';
+    this.authorizationBearerToken = '';
   }
 
   setHeaders(): void {
     this.httpOptionsJson = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this.tokenGitlab,
+        'Authorization': 'Bearer ' + this.authorizationBearerToken,
       })
     };
   }
 
-
-  getRequest<T>(url: string, param?: object): Observable<T> {
+  protected getRequest<T>(url: string, param?: object): Observable<T> {
     return this.httpClient.get<T>(url);
   }
 
-  getRequestWithHeader<T>(url: string, params?: any): Observable<any> {
+  protected getRequestWithHeader<T>(url: string, params?: any): Observable<any> {
     if (params !== undefined) {
       return this.httpClient.get<T>(url, { params, headers: this.httpOptionsJson.headers });
     } else {
@@ -39,7 +35,7 @@ export class HttpService {
     }
   }
 
-  getFileWithHeader<Blob>(url: string, params?: any): Observable<any> {
+  protected getFileWithHeader<Blob>(url: string, params?: any): Observable<any> {
     if (params !== undefined) {
       return this.httpClient.get<Blob>(url, {
         params,
@@ -51,18 +47,23 @@ export class HttpService {
     }
   }
 
-
-  postRequest(url: string, payload: any): Observable<any> {
+  protected postRequest(url: string, payload: any): Observable<any> {
     return this.httpClient.post(url, payload);
   }
 
-  patchRequest(url: string, payload: any): Observable<any> {
+  protected postRequestWithHeader<T>(url: string, payload?: any, params?: any): Observable<any> {
+    if (params !== undefined) {
+      return this.httpClient.post<T>(url, payload, { params, headers: this.httpOptionsJson.headers });
+    } else {
+      return this.httpClient.post<T>(url, payload, this.httpOptionsJson);
+    }
+  }
+
+  protected patchRequest(url: string, payload: any): Observable<any> {
     return this.httpClient.patch(url, payload);
   }
 
-  patchRequestWithHeader(url: string, payload: any): Observable<any> {
+  protected patchRequestWithHeader(url: string, payload: any): Observable<any> {
     return this.httpClient.patch(url, payload, this.httpOptionsJson);
   }
-
-
 }
