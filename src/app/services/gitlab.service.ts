@@ -23,7 +23,7 @@ export class GitlabService extends HttpService{
   }
 
   postPipeline(projectId: string, ref: string, releaseVersion: string, snapVersion: string): Observable<any> {
-    return this.postRequestWithHeader(this.baseURL + projectId + '/pipeline?ref=' + ref, {variables:[{ 'key': 'PMPRELEASE', 'value': releaseVersion }, {'key': 'PMPVRSSNAP', 'value': snapVersion}]});
+    return this.postRequestWithHeader(this.baseURL + projectId + '/pipeline?ref=' + ref, {variables:[{ 'key': 'PMPRELEASE', 'value': releaseVersion }, {'key': 'PMPVRSSNAP', 'value': snapVersion}, {'key': 'PMP_DEPLOYDEV', 'value': 'Devel_01'}, {'key': 'PMP_DEPLOYTEST', 'value': 'Test_01'}]});
   }
 
   getBranches(projectId: string): Observable<any> {
